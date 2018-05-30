@@ -1,0 +1,16 @@
+Our monthly meetup this month will be held at the Axis Group offices in Sandy Springs. For those of us who work in Midtown or Buckhead this event is MARTA accessible! The schedule is as follows:
+
+7:00 - 7:20: Food and Networking
+7:20 - 7:25: Intro and Welcome by Matt Mills
+7:25 - 8:00: Building and deploying a Static Site using Blogdown and Netlify by Jonathan Lamberts
+8:00 - 8:35: Your first R package in 30 minutes by Jay Lee
+
+Speakers:
+
+Jonathan Lamberts is a Data Scientist at Axis Group and a MS CS student at Georgia Tech. He enjoys exploring and analyzing data using R and Python, playing around with reinforcement learning, and trying out new technologies of all kinds. He occasionally blogs on https://jonathanlamberts.com.
+
+Jay Lee is a senior data scientist at AT&T. He likes to talk about data science workflow, R programming, and UNC men’s basketball. He blogs at https://joongsup.rbind.io and is the maintainer of an R data package uncmbb that contains UNC men’s basketball team’s match results.
+
+Jay has asked that attendees please take this survey to help him determine people's familiarity with developing R packages: https://www.surveymonkey.com/r/5H9FL6W In addition he would like to make people aware that his presentation going to be a hands-on session specifically in RStudio and for anyone interested in following along to please install Rstudio and the devtools and roxygen2 packages before the event to make things as run as smoothly as possible.
+
+Please RSVP as space is limited.
