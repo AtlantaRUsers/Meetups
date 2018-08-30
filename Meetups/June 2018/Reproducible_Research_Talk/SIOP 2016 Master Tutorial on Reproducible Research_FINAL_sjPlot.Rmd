@@ -1,0 +1,400 @@
+---
+title: "SIOP 2016 Master Tutorial on Reproducible Research_FINAL_sjPlot"
+author: "Rob S."
+date: "April 16, 2016"
+output:
+  html_document:
+    theme: united
+    toc: yes
+csl: apa.csl
+bibliography: citations.bib
+---
+
+```{r global_options, fig.width=14, fig.height=8, fig.path='Figs/', echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+#knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+#                      echo=TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, echo=FALSE)
+```
+
+
+```{r}
+#tryCatch code to load all necessary packages
+tryCatch(require(knitr),finally=utils:::install.packages(pkgs='knitr',repos='http://cran.r-project.org'));
+require(knitr)
+
+tryCatch(require(evaluate),finally=utils:::install.packages(pkgs='evaluate',repos='http://cran.r-project.org'));
+require(evaluate)
+
+#tryCatch code to load all necessary packages
+tryCatch(require(RCurl),finally=utils:::install.packages(pkgs='RCurl',repos='http://cran.r-project.org'));
+require(RCurl)
+
+tryCatch(require(psych),finally=utils:::install.packages(pkgs='psych',repos='http://cran.r-project.org'));
+require(psych)
+
+tryCatch(require(sjPlot),finally=utils:::install.packages(pkgs='sjPlot',repos='http://cran.r-project.org'));
+require(sjPlot)
+
+tryCatch(require(quantreg),finally=utils:::install.packages(pkgs='quantreg',repos='http://cran.r-project.org'));
+require(quantreg)
+
+tryCatch(require(dplyr),finally=utils:::install.packages(pkgs='dplyr',repos='http://cran.r-project.org'));
+require(dplyr)
+
+tryCatch(require(reshape),finally=utils:::install.packages(pkgs='reshape',repos='http://cran.r-project.org'));
+require(reshape)
+```
+
+
+
+```{r}
+# library(RCurl)
+# x <- getURL("https://raw.githubusercontent.com/RobStilson/SIOP_2016_Master_Tutorial/master/mydata_10k.csv")
+# mydata_10k <- read.csv(text = x)
+
+mydata_10k <- read.csv("C:\\Users\\e367502\\Desktop\\R Stuff\\mydata_10k.csv")
+
+#Pulling a random sample of 1000
+set.seed(1)
+mydata <- mydata_10k[ sample( which(mydata_10k$country=='USA'), 1000, replace=FALSE),]
+#Remove # in front of `mydata` on the line below and put # in front of `mydata` on the line above to load the 10,000 applicant sample.
+#mydata <- mydata_10k
+```
+
+
+# SIOP 2016 Reproducible Research Master Tutorial
+
+## Introduction
+
+The purpose of this study is to briefly go over some of the ways you can use R Markdown for creating documents. The data utilized in this study comes from [Johnson's IPIP-NEO data repository](https://osf.io/wxvth/). This repository contains data from the [International Personality Item Pool](http://ipip.ori.org/) (IPIP) for both the 300 item version and the 120 item version. The data for the 300 item version contains 307,313 respondents from around the world and the data for the 120 item version has 619,150 respondents. Additional information regarding these studies is available on Johnson's web site and in [@johnson2014measuring].
+
+## Study
+
+This study looks at coefficient alpha [@cronbach1951coefficient] to determine the internal reliability of the scales of the IPIP120 which correspond to the constructs of the NEO-PI-R [@costa1992neo]. Reliability will be calculated at the overall scale level and not at the facet level. Table 1 gives a break down of the five scales and the facets that make up each scale.
+
+### Table 1. IPIP120 Scales and Facets.
+
++------------------------+------------------------+
+| Scale                  | Facets                 |
++========================+========================+
+| Agreeableness          | - Trust                |
+|                        | - Morality             |
+|                        | - Altruism             |              
+|                        | - Cooperation          |
+|                        | - Modesty              |
+|                        | - Sympathy             |
++------------------------+------------------------+
+| Conscientiousness      | - Self-Efficacy        |
+|                        | - Orderliness         |
+|                        | - Dutifulness          |
+|                        | - Achievement-Striving |
+|                        | - Self-Discipline      |
+|                        | - Cautiousness         |
++------------------------+------------------------+
+| Extraversion           | - Friendliness         |
+|                        | - Gregariousness       |
+|                        | - Assertiveness        |
+|                        | - Activity Level       |
+|                        | - Excitement-Seeking   |
+|                        | - Cheerfulness         |
++------------------------+------------------------+
+| Neuroticism            | - Anxiety              |
+|                        | - Anger                |
+|                        | - Depression           |
+|                        | - Self-Consciousness   |
+|                        | - Immoderation         |
+|                        | - Vulnerability        |
++------------------------+------------------------+
+| Openness               | - Imagination          |
+|                        | - Artistic Interest    |
+|                        | - Emotionality         |
+|                        | - Adventurousness      |
+|                        | - Intellect            |
+|                        | - Liberalism           |
++------------------------+------------------------+
+
+## Method
+
+For this study we took a random sample of `r formatC(nrow(mydata), big.mark = ',')` from the United States. The average age of the participant was `r round(mean(mydata$age))` and the gender split was `r sum((mydata$sex=='2')/nrow(mydata))*100`% female. 
+
+
+```{r}
+# recode 0 (missing response) to NA across multiple columns
+#From: http://onertipaday.blogspot.com/2009/06/replacing-0-with-na-evergreen-from-list.html
+
+#And
+
+#From: https://stackoverflow.com/questions/14737773/replacing-occurrences-of-a-number-in-multiple-columns-of-data-frame-with-another
+
+mydata[,11:130][mydata[,11:130] ==0] <- NA
+```
+
+
+```{r, echo=FALSE, results='hide'}
+library(psych)
+#Taking a look at the data to make sure it did what we wanted.
+describe(mydata)
+```
+
+
+```{r}
+#Calculating summary stats via the psych() package
+describe_stats_mydata <- round(describe(mydata), 3)
+
+library(sjPlot)
+# describe_stats_mydata_table <- sjt.df(describe_stats_mydata, title = "Descriptive Stats", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+
+describe_stats_mydata_table <- sjPlot::tab_df(describe_stats_mydata, title = "Descriptive Stats", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+```
+
+
+```{r}
+#Renaming variables
+
+# rename programmatically 
+library(reshape)
+#mydata <- rename(mydata, c(oldname="newname"))
+
+mydata <- rename(mydata, c(i1="N1"))
+mydata <- rename(mydata, c(i2="E1"))
+mydata <- rename(mydata, c(i3="O1"))
+mydata <- rename(mydata, c(i4="A1"))
+mydata <- rename(mydata, c(i5="C1"))
+mydata <- rename(mydata, c(i6="N2"))
+mydata <- rename(mydata, c(i7="E2"))
+mydata <- rename(mydata, c(i8="O2"))
+mydata <- rename(mydata, c(i9="A2"))
+mydata <- rename(mydata, c(i10="C2"))
+mydata <- rename(mydata, c(i11="N3"))
+mydata <- rename(mydata, c(i12="E3"))
+mydata <- rename(mydata, c(i13="O3"))
+mydata <- rename(mydata, c(i14="A3"))
+mydata <- rename(mydata, c(i15="C3"))
+mydata <- rename(mydata, c(i16="N4"))
+mydata <- rename(mydata, c(i17="E4"))
+mydata <- rename(mydata, c(i18="O4"))
+mydata <- rename(mydata, c(i19="A4"))
+mydata <- rename(mydata, c(i20="C4"))
+mydata <- rename(mydata, c(i21="N5"))
+mydata <- rename(mydata, c(i22="E5"))
+mydata <- rename(mydata, c(i23="O5"))
+mydata <- rename(mydata, c(i24="A5"))
+mydata <- rename(mydata, c(i25="C5"))
+mydata <- rename(mydata, c(i26="N6"))
+mydata <- rename(mydata, c(i27="E6"))
+mydata <- rename(mydata, c(i28="O6"))
+mydata <- rename(mydata, c(i29="A6"))
+mydata <- rename(mydata, c(i30="C6"))
+mydata <- rename(mydata, c(i31="N1"))
+mydata <- rename(mydata, c(i32="E1"))
+mydata <- rename(mydata, c(i33="O1"))
+mydata <- rename(mydata, c(i34="A1"))
+mydata <- rename(mydata, c(i35="C1"))
+mydata <- rename(mydata, c(i36="N2"))
+mydata <- rename(mydata, c(i37="E2"))
+mydata <- rename(mydata, c(i38="O2"))
+mydata <- rename(mydata, c(i39="A2"))
+mydata <- rename(mydata, c(i40="C2"))
+mydata <- rename(mydata, c(i41="N3"))
+mydata <- rename(mydata, c(i42="E3"))
+mydata <- rename(mydata, c(i43="O3"))
+mydata <- rename(mydata, c(i44="A3"))
+mydata <- rename(mydata, c(i45="C3"))
+mydata <- rename(mydata, c(i46="N4"))
+mydata <- rename(mydata, c(i47="E4"))
+mydata <- rename(mydata, c(i48="O4"))
+mydata <- rename(mydata, c(i49="A4"))
+mydata <- rename(mydata, c(i50="C4"))
+mydata <- rename(mydata, c(i51="N5"))
+mydata <- rename(mydata, c(i52="E5"))
+mydata <- rename(mydata, c(i53="O5"))
+mydata <- rename(mydata, c(i54="A5"))
+mydata <- rename(mydata, c(i55="C5"))
+mydata <- rename(mydata, c(i56="N6"))
+mydata <- rename(mydata, c(i57="E6"))
+mydata <- rename(mydata, c(i58="O6"))
+mydata <- rename(mydata, c(i59="A6"))
+mydata <- rename(mydata, c(i60="C6"))
+mydata <- rename(mydata, c(i61="N1"))
+mydata <- rename(mydata, c(i62="E1"))
+mydata <- rename(mydata, c(i63="O1"))
+mydata <- rename(mydata, c(i64="A1"))
+mydata <- rename(mydata, c(i65="C1"))
+mydata <- rename(mydata, c(i66="N2"))
+mydata <- rename(mydata, c(i67="E2"))
+mydata <- rename(mydata, c(i68="O2"))
+mydata <- rename(mydata, c(i69="A2"))
+mydata <- rename(mydata, c(i70="C2"))
+mydata <- rename(mydata, c(i71="N3"))
+mydata <- rename(mydata, c(i72="E3"))
+mydata <- rename(mydata, c(i73="O3"))
+mydata <- rename(mydata, c(i74="A3"))
+mydata <- rename(mydata, c(i75="C3"))
+mydata <- rename(mydata, c(i76="N4"))
+mydata <- rename(mydata, c(i77="E4"))
+mydata <- rename(mydata, c(i78="O4"))
+mydata <- rename(mydata, c(i79="A4"))
+mydata <- rename(mydata, c(i80="C4"))
+mydata <- rename(mydata, c(i81="N5"))
+mydata <- rename(mydata, c(i82="E5"))
+mydata <- rename(mydata, c(i83="O5"))
+mydata <- rename(mydata, c(i84="A5"))
+mydata <- rename(mydata, c(i85="C5"))
+mydata <- rename(mydata, c(i86="N6"))
+mydata <- rename(mydata, c(i87="E6"))
+mydata <- rename(mydata, c(i88="O6"))
+mydata <- rename(mydata, c(i89="A6"))
+mydata <- rename(mydata, c(i90="C6"))
+mydata <- rename(mydata, c(i91="N1"))
+mydata <- rename(mydata, c(i92="E1"))
+mydata <- rename(mydata, c(i93="O1"))
+mydata <- rename(mydata, c(i94="A1"))
+mydata <- rename(mydata, c(i95="C1"))
+mydata <- rename(mydata, c(i96="N2"))
+mydata <- rename(mydata, c(i97="E2"))
+mydata <- rename(mydata, c(i98="O2"))
+mydata <- rename(mydata, c(i99="A2"))
+mydata <- rename(mydata, c(i100="C2"))
+mydata <- rename(mydata, c(i101="N3"))
+mydata <- rename(mydata, c(i102="E3"))
+mydata <- rename(mydata, c(i103="O3"))
+mydata <- rename(mydata, c(i104="A3"))
+mydata <- rename(mydata, c(i105="C3"))
+mydata <- rename(mydata, c(i106="N4"))
+mydata <- rename(mydata, c(i107="E4"))
+mydata <- rename(mydata, c(i108="O4"))
+mydata <- rename(mydata, c(i109="A4"))
+mydata <- rename(mydata, c(i110="C4"))
+mydata <- rename(mydata, c(i111="N5"))
+mydata <- rename(mydata, c(i112="E5"))
+mydata <- rename(mydata, c(i113="O5"))
+mydata <- rename(mydata, c(i114="A5"))
+mydata <- rename(mydata, c(i115="C5"))
+mydata <- rename(mydata, c(i116="N6"))
+mydata <- rename(mydata, c(i117="E6"))
+mydata <- rename(mydata, c(i118="O6"))
+mydata <- rename(mydata, c(i119="A6"))
+mydata <- rename(mydata, c(i120="C6"))
+
+
+```
+
+
+```{r}
+#Calculating summary stats via the psych() package
+describe_stats_mydata <- round(describe(mydata), 3)
+
+library(sjPlot)
+# describe_stats_mydata_table <- sjt.df(describe_stats_mydata, title = "Descriptive Stats", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+
+describe_stats_mydata_table <- sjPlot::tab_df(describe_stats_mydata, title = "Descriptive Stats", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+```
+
+Table 2 contains the descriptive statistics by item.
+
+### Table 2: Descriptive statistics by item
+`r describe_stats_mydata_table`
+
+
+
+```{r}
+items <- mydata[c(11:130)]
+
+keys <- make.keys(nvars=120, list(
+    AGR=c(4,-9,14,-19,-24,29,34,-39,44,-49,-54,59,64,-69,-74,-79,-84,-89,-94,-99,-104,-109,-114,-119),
+    CON=c(5,10,15,20,25,-30,35,-40,45,50,55,-60,65,-70,-75,-80,-85,-90,95,-100,-105,-110,-115,-120), 
+    EXT=c(2,7,12,17,22,27,32,37,42,47,52,57,-62,-67,72,77,82,87,-92,-97,-102,	-107,112,117),
+    NEU=c(1,6,11,16,21,26,31,36,41,46,-51,56,61,66,71,76,-81,86,91,-96,-101,-106,-111,-116),
+    OPN=c(3,8,13,18,23,28,33,38,43,-48,-53,58,63,-68,-73,-78,-83,-88,93,-98,	-103,-108,-113,-118)),
+    item.labels=(colnames(items)))
+```
+
+
+```{r, echo=FALSE, results='hide'}
+scores <- scoreItems(keys, items)
+#And take a look
+scores
+```
+
+```{r}
+scores_alpha <- round(as.data.frame(scores$alpha), 3)
+
+# scores_alpha_table <- sjt.df(scores_alpha, title = "Alpha Reliability of Scales", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+
+scores_alpha_table <- sjPlot::tab_df(scores_alpha, title = "Alpha Reliability of Scales", alternateRowColors=TRUE, useViewer=F, describe=FALSE,encoding = "UTF-8", no.output=TRUE, hideProgressBar = TRUE)$knitr
+```
+
+Alpha reliabilities are located in Table 3.
+
+### Table 3: Alpha reliabilities
+`r scores_alpha_table`
+
+
+```{r, echo=FALSE, results='hide'}
+#Creating total scores
+library(dplyr)
+
+mydata_test <- items %>%
+    mutate(AGR_Total = rowSums(items[c(4,9,14,19,24,29,34,39,44,49,54,59,64,69,74,79,84,89,94,99,104,109,114,119)])) %>%
+    mutate(CON_Total = rowSums(items[c(5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120)])) %>%
+    mutate(EXT_Total = rowSums(items[c(2,7,12,17,22,27,32,37,42,47,52,57,62,67,72,77,82,87,92,97,102,	107,112,117)])) %>%
+    mutate(NEU_Total = rowSums(items[c(1,6,11,16,21,26,31,36,41,46,51,56,61,66,71,76,81,86,91,96,101,106,111,116)])) %>%
+    mutate(OPN_Total = rowSums(items[c(3,8,13,18,23,28,33,38,43,48,53,58,63,68,73,78,83,88,93,98,103,108,113,118)]))
+
+
+round(describe(mydata_test), 3)
+round(describe(mydata_test[c(121:125)]), 3)
+
+```
+
+
+
+```{r}
+corr_table <- sjt.corr(mydata_test[c(121:125)], corr.method = "pearson", digits=3, triangle = "lower", title = "Correlation of Scales", encoding = "UTF-8", no.output=TRUE)$knitr
+
+# corr_table <- sjPlot::tab_df(mydata_test[c(121:125)], corMethod = "pearson", digits=3, triangle = "lower", title = "Correlation of Scales", encoding = "UTF-8", no.output=TRUE)$knitr
+
+```
+
+
+### Table 4: Correlations between scale total scores
+`r corr_table`
+
+## Data Visualization
+
+Figure 1 contains a scatter plot of matrices (SPLOM) of the average score (as opposed to total score in Table 4) on each scale. This plot contains a bivariate scatter plot below the diagonal, histograms on the diagonal, and the Pearson correlation above the diagonal.
+
+### Figure 1: Scatter plot of average scale scores matrices
+```{r}
+pairs.panels(scores$scores,pch='.',jiggle=TRUE)
+``` 
+
+## Results
+
+The alpha reliability analysis for this sample indicates that none of the five scales reached the commonly accepted threshold of $\alpha$ = .70 (@nunnally1970introduction).
+
+## Discussion
+
+Our reliabilities differed significantly from [@johnson2014measuring]'s results. See Table 5 for the comparison. These differences may be due to sampling error. Limitations of this study include using a relatively small sample size compared the sample size available, (`r formatC(nrow(mydata), big.mark = ',')` vs 619,150), and only sampling from the United States. Future studies could use larger sample sizes and include more countries than just the United States.
+
+### Table 5
+
+Scale             | Current Study    |  Johnson (2014)
+----------------- | :-------------:  | :--------------:
+Neuroticism       | 0.69             | 0.90
+Extraversion      | 0.64             | 0.89
+Openness          | 0.12             | 0.83
+Agreeableness     | 0.59             | 0.87
+Conscientiousness | 0.46             | 0.90
+
+### Table 6
+
+Scale             | Current Study   |  Johnson (2014)`
+----------------- | :-------------: | :--------------:
+Neuroticism       | `r round(scores_alpha$NEU,2)` | 0.90
+Extraversion      | `r round(scores_alpha$EXT,2)` | 0.89
+Openness          | `r round(scores_alpha$OPN,2)` | 0.83
+Agreeableness     | `r round(scores_alpha$AGR,2)` | 0.87
+Conscientiousness | `r round(scores_alpha$CON,2)` | 0.90
+
+## References

@@ -1,0 +1,13 @@
+base
+knitr
+ggplot2
+dplyr
+gapminder
+bindrcpp
+tidyr
+patchwork
+purrr
+ggridges
+ggrepel
+ggExtra
+gghighlight

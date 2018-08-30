@@ -1,0 +1,188 @@
+---
+title: "R Class-RMarkdown (Teaching)"
+author: "Rob S."
+date: "June 13, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+#Load packages here.
+tryCatch(require(pacman),finally=utils:::install.packages(pkgs='pacman',repos='http://cran.r-project.org'));
+require(pacman)
+
+pacman::p_load(dplyr,
+               ggplot2,
+               DT)
+
+#' <!-- #Loading from GitHub -->
+#' <!-- #pacman::p_load_current_gh("trinker/lexicon", "trinker/sentimentr") -->
+
+#' <!-- #Loading libraries -->
+
+suppressPackageStartupMessages({
+library(dplyr)
+library(ggplot2)
+library(DT)
+})
+```
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Formatting
+
+Plain text
+
+End a line with two spaces to start a new paragraph.  
+
+*italics* and _italics_
+
+**bold** and __bold__
+
+superscript^2^
+
+~~strikethrough~~
+
+[link](www.rstudio.com)
+
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
+
+Let's go ahead and knit and see how it looks.
+
+endash: --
+
+emdash: ---
+
+ellipsis: ...
+
+inline equation: $A = \pi*r^{2}$
+
+image: ![](C:\\Users\\e367502\\Desktop\\R Stuff\\R_image.jpg)
+
+horizontal rule (or slide break): 
+***
+
+> block quote
+
+* unordered list
+* item 2
+    + sub-item 1
+    + sub-item 2
+
+1. ordered list
+2. item 2
+    + sub-item 1
+    + sub-item 2
+
+Table Header | Second Header
+-------------|--------------
+Table Cell   | Cell 2
+Cell 3       | Cell 4
+
+Let's knit again to look at our table.
+
+[Here](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf) is a link to the [www.rstudio.com](www.rstudio.com) R Markdown cheat sheet where we got all of the above examples. 
+
+Now let's get back to the code.
+
+CTRL + ALT + i is the shortcut to create a code chunk.
+
+```{r}
+#This will provide the session information which can be helpful when sharing documents.
+sessionInfo()
+```
+
+We can play with the code chunk options. For this demo, we will use `mtcars`. Notice how we set off `mtcars` with the back ticks below the tilde on your keyboard.
+You will often see this to delineate packages, functions, datasets, etc. 
+
+```{r}
+df <- mtcars
+head(df)
+```
+
+If we want to load the data and not have it show, we will do `echo = FALSE`.
+
+```{r, echo = FALSE}
+df <- mtcars
+head(df)
+```
+
+If we want to have the code and output collapse into a single block, we will do `collapse = TRUE`.
+
+```{r, collapse = TRUE}
+df <- mtcars
+head(df)
+```
+
+## R Markdown Chunk Options
+![](C:\\Users\\e367502\\Desktop\\R Stuff\\R Markdown Chunk Options.png)
+
+Here we can show a scatter plot
+
+```{r}
+scat_plot <- ggplot(df, aes(x=mpg, y = wt)) +
+    geom_point()
+
+scat_plot
+```
+
+Let's put in an interactive data table.
+
+```{r, echo = FALSE}
+DT::datatable(df, filter = 'top')
+```
+
+
+We can also do inline code with R Markdown which will use code to fill in numbers or text automatically.
+
+The mean mpg in the `mtcars` data set is `r mean(df$mpg)` and the SD is `r sd(df$mpg)`.
+
+We can add in rounding to the mean of `r round(mean(df$mpg), 2)` and the SD of `r round(sd(df$mpg), 2)`.
+
+It is nice because if we get a new data pull, with the code in there it will automatically update. 
+
+For example, if we just take the first 5 rows from `mtcars` we can use the same code with the updated df (e.g. df2) and it is already taken care of.
+
+```{r}
+#We will take the first 5 rows
+library(dplyr)
+df2 <- df[1:5,]
+```
+
+The mean mpg in the `df2` data set is `r round(mean(df2$mpg), 2)` and the SD is `r round(sd(df2$mpg), 2)` and the name of the first car is `r rownames(df2[1,])`.
+
+Extensive tutorial on R Markdown [here](http://www.stat.cmu.edu/~cshalizi/rmarkdown/)
+
+Extensive list of various R class codes and notes [here](https://datasciencespecialization.github.io/)
+
+Now we will play with the YAML code which is the code you see at the very top of the R Markdown document.
+
+
